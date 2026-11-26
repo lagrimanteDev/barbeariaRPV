@@ -18,8 +18,11 @@ export class EmpresasService {
     return this.prisma.empresa.create({ data: dto })
   }
 
-  findAll() {
-    return this.prisma.empresa.findMany({ orderBy: { nome: `asc` } });
+  findAll(ativas = false) {
+    return this.prisma.empresa.findMany({
+      where: { ativa: ativas ? true : undefined },
+      orderBy: { nome: 'asc' },
+    });
   }
 
   async findOne(id: number) {

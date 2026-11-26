@@ -3,12 +3,14 @@ import { CreateProfissionaisDto } from './dto/create-profissional.dto.js';
 import { UpdateProfissionaisDto } from './dto/update-profissional.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EmpresasService } from '../empresas/empresas.service.js';
+import { ExpedientesService } from '../expedientes/expedientes.service.js';
 
 @Injectable()
 export class ProfissionaisService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly empresas: EmpresasService
+    private readonly empresas: EmpresasService,
+    private readonly expedientes: ExpedientesService,
   ) { }
 
   async create(empresaId: number, dto: CreateProfissionaisDto) {
@@ -45,9 +47,26 @@ export class ProfissionaisService {
   async update(empresaId: number, id: number, dto: UpdateProfissionaisDto) {
     await this.empresas.validarEmpresaAtiva(empresaId);
 
-    await this.findOne(empresaId, id)
+    return this.prisma.$transaction(async (tx) => {
+      await this.expedientes.lockProfissional(tx, empresaId, id);
+      if (dto.ativo === false) {
+        const agendamentosFuturos = await tx.agendamento.count({
+          where: {
+            empresaId,
+            profissionalId: id,
+            status: 'AGENDADO',
+            inicio: { gt: new Date() },
+          },
+        });
+        if (agendamentosFuturos > 0) {
+          throw new ConflictException(
+            'Remarque ou cancele os agendamentos futuros antes de desativar o profissional',
+          );
+        }
+      }
 
-    return this.prisma.profissional.update({ where: { id, empresaId }, data: dto })
+      return tx.profissional.update({ where: { id, empresaId }, data: dto });
+    });
   }
 
   async remove(empresaId: number, id: number) {

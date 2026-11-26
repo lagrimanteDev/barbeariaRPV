@@ -41,12 +41,14 @@ model Cliente {
 }
 
 model Profissional {
-  id           Int           @id @default(autoincrement())
-  nome         String
-  ativo        Boolean       @default(true)
-  empresa      Empresa?      @relation(fields: [empresaId], references: [id])
-  empresaId    Int?
-  agendamentos Agendamento[]
+  id              Int               @id @default(autoincrement())
+  nome            String
+  ativo           Boolean           @default(true)
+  empresa         Empresa?          @relation(fields: [empresaId], references: [id])
+  empresaId       Int?
+  agendamentos    Agendamento[]
+  horariosSemanais HorarioSemanal[]
+  excecoesAgenda  ExcecaoAgenda[]
 
   @@map("profissionais")
 }
@@ -76,6 +78,9 @@ model Agendamento {
   fim            DateTime
   status         StatusAgendamento    @default(AGENDADO)
   criadoEm       DateTime             @default(now())
+  motivo         String?              @db.VarChar(500)
+  idempotencyKey String?              @unique
+  payloadHash    String?              @db.Char(64)
   empresa        Empresa?             @relation(fields: [empresaId], references: [id])
   empresaId      Int?
   cliente        Cliente?             @relation(fields: [clienteId], references: [id])
@@ -88,12 +93,51 @@ model Agendamento {
 }
 
 model AgendamentoServico {
-  precoCobrado  Float
-  servico       Servico?     @relation(fields: [servicoId], references: [id])
-  servicoId     Int
-  agendamento   Agendamento? @relation(fields: [agendamentoId], references: [id])
-  agendamentoId Int
+  precoCobrado   Float
+  duracaoMinutos Int          @default(30)
+  servico        Servico?     @relation(fields: [servicoId], references: [id])
+  servicoId      Int
+  agendamento    Agendamento? @relation(fields: [agendamentoId], references: [id])
+  agendamentoId  Int
 
   @@id([agendamentoId, servicoId])
   @@map("agendamento_servicos")
+}
+
+model HorarioSemanal {
+  id             Int          @id @default(autoincrement())
+  empresaId      Int
+  profissionalId Int
+  diaSemana      Int
+  inicio         String       @db.VarChar(5)
+  fim            String       @db.VarChar(5)
+  profissional   Profissional @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+
+  @@index([empresaId, profissionalId, diaSemana])
+  @@map("horarios_semanais")
+}
+
+model ExcecaoAgenda {
+  id             Int                       @id @default(autoincrement())
+  empresaId      Int
+  profissionalId Int
+  data           DateTime                  @db.Date
+  fechado        Boolean                   @default(false)
+  profissional   Profissional              @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+  horarios       ExcecaoHorarioIntervalo[]
+
+  @@unique([profissionalId, data])
+  @@index([empresaId, data])
+  @@map("excecoes_agenda")
+}
+
+model ExcecaoHorarioIntervalo {
+  id         Int           @id @default(autoincrement())
+  excecaoId  Int
+  inicio     String        @db.VarChar(5)
+  fim        String        @db.VarChar(5)
+  excecao    ExcecaoAgenda @relation(fields: [excecaoId], references: [id], onDelete: Cascade)
+
+  @@index([excecaoId])
+  @@map("excecao_horarios")
 }

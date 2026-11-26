@@ -1,114 +1,90 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Sistema de Barbearia
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Aplicação de gestão interna para agendamentos, clientes, profissionais e serviços. O repositório contém uma API NestJS/Prisma e um front-end React/TypeScript com Vite.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Requisitos
 
-## Description
+- Node.js 20 ou superior
+- MySQL ou MariaDB
+- Uma base vazia ou acessível para a aplicação
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Configuração da API
 
-## Project setup
+Na raiz do repositório, copie `.env.example` para `.env` e ajuste `DATABASE_URL`:
 
-```bash
-$ pnpm install
+```env
+DATABASE_URL="mysql://usuario:senha@localhost:3306/sistema_barbearia"
+FRONTEND_ORIGIN="http://localhost:5173,http://127.0.0.1:5173"
 ```
 
-## Compile and run the project
+Instale as dependências, gere o cliente Prisma e aplique as migrações:
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm install
+pnpm exec prisma generate
+pnpm exec prisma migrate deploy
 ```
 
-## Run tests
+Carregue dados fictícios repetíveis para demonstração:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+pnpm run db:seed
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Inicie a API:
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+A API fica disponível em `http://127.0.0.1:3000`. As rotas de negócio usam o header `x-empresa-id`; consulte as empresas ativas em `GET /empresas?ativas=true`.
 
-## Observability
+## Configuração do front-end
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+Em outro terminal:
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+```bash
+npm install --prefix frontend
+npm run dev --prefix frontend
+```
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+Abra `http://localhost:5173`. Para apontar o front-end a outra URL, copie `frontend/.env.example` para `frontend/.env.local` e altere `VITE_API_URL`.
 
-## Resources
+Build de produção:
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+npm run build --prefix frontend
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Funcionalidades
 
-## Support
+- Painel diário com todos os status, atendimentos próximos, pendências antigas e fila offline.
+- Fluxo de reserva em quatro etapas, busca/cadastro de cliente, seleção de serviços e consulta de disponibilidade.
+- Expediente semanal por profissional, exceções de data, remarcação e atualização de status.
+- Cadastro e manutenção de clientes, profissionais e serviços.
+- Tentativas offline de criação são armazenadas no navegador e repetidas com uma chave idempotente. A reserva só é considerada confirmada depois da resposta da API.
+- Horários e datas da agenda são tratados no fuso `America/Sao_Paulo`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## API e contratos relevantes
 
-## Stay in touch
+- `GET /agendamentos/horarios-disponiveis?profissionalId=1&data=AAAA-MM-DD&servicoIds=1,2`
+- `GET /profissionais/:id/expediente`
+- `PUT /profissionais/:id/expediente/semanal` com `{ "horarios": [{ "diaSemana": 1, "inicio": "09:00", "fim": "12:00" }] }` (`diaSemana`: domingo `0` a sábado `6`)
+- `PUT /profissionais/:id/expediente/excecoes/:data` com `{ "fechado": true, "periodos": [] }` ou horários substitutos
+- `PATCH /agendamentos/:id/remarcar` com `{ "profissionalId": 1, "inicio": "..." }`
+- `POST /agendamentos` exige `Idempotency-Key`. Repetir a chave e o mesmo payload devolve o agendamento já criado; reutilizá-la com payload diferente gera conflito.
+- `PATCH /agendamentos/:id/status` aceita `CONCLUIDO`, `CANCELADO` ou `FALTOU`; a falta só pode ser registrada depois do fim previsto. O campo `motivo` é opcional para cancelamento/falta.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Atualizações de expediente que deixariam agendamentos futuros fora dos horários de trabalho são rejeitadas até que as reservas sejam resolvidas. A API serializa criações e alterações por profissional e valida novamente a disponibilidade no momento da gravação.
 
-## License
+## Testes e qualidade
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+pnpm test
+pnpm run build
+pnpm run lint
+```
+
+## Segurança e execução
+
+O fluxo sem autenticação é destinado exclusivamente a demonstrações e ambientes internos privados. O header `x-empresa-id` apenas seleciona o contexto da empresa e **não** autentica nem autoriza usuários. Antes de disponibilizar o sistema na internet, implemente autenticação e autorização na API. Configure `FRONTEND_ORIGIN` para a origem confiável do front-end.

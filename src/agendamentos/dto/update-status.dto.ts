@@ -1,4 +1,4 @@
-import { IsIn } from "class-validator";
+import { IsIn, IsOptional, IsString, MaxLength } from "class-validator";
 
 export const STATUS_FINAIS = ["CANCELADO", "CONCLUIDO", "FALTOU"] as const;
 export type StatusFinal = (typeof STATUS_FINAIS)[number];
@@ -8,4 +8,9 @@ export class UpdateStatusDto {
         message: "status deve ser CONCLUIDO, CANCELADO ou FALTOU",
     })
     status: StatusFinal;
+
+    @IsOptional()
+    @IsString()
+    @MaxLength(500)
+    motivo?: string;
 }

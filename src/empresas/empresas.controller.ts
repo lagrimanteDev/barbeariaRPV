@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { EmpresasService } from './empresas.service.js';
 import { CreateEmpresaDto } from './dto/create-empresa.dto.js';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto.js';
@@ -13,8 +13,8 @@ export class EmpresasController {
   }
 
   @Get()
-  findAll() {
-    return this.empresasService.findAll();
+  findAll(@Query('ativas') ativas?: string) {
+    return this.empresasService.findAll(ativas === 'true');
   }
 
   @Get(':id')

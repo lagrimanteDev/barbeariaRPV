@@ -55,8 +55,11 @@ export class ServicosService {
     await this.empresas.validarEmpresaAtiva(empresaId)
 
     const usos = await this.prisma.agendamentoServico.count({
-      where: { empresaId, servicoId: id }
-    })
+  where: {
+    servicoId: id,
+    servico: { is: { empresaId } },
+  },
+});
 
     if (usos > 0) {
       throw new ConflictException('Serviço já utilizado em agendamentos e não pode ser excluído')
